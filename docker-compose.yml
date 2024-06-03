@@ -1,0 +1,56 @@
+version: '3.9'
+services:
+    nginx:
+        container_name: nginx_new
+        image: nginx:alpine
+        restart: on-failure
+        ports:
+            - "8080:80"
+        depends_on:
+            - app
+        volumes:
+            - ./nginx/conf.d:/etc/nginx/conf.d
+            - .:/var/www
+        networks:
+            - app-network
+    db:
+        container_name: mysql_new
+        image: mysql:lts
+        restart: on-failure
+        ports:
+            - "3306:3306"
+        volumes:
+            - ./mysql/data:/var/lib/mysql
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_ROOT_USERNAME: ${DB_USERNAME}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+        networks:
+            - app-network
+    app:
+        container_name: app_new
+        build:
+            context: .
+            dockerfile: Dockerfile
+        restart: on-failure
+        ports:
+            - "9000:9000"
+        volumes:
+            - .:/var/www
+        working_dir: /var/www
+        depends_on:
+            -   db
+        networks:
+            - app-network
+    adminer:
+        image: phpmyadmin/phpmyadmin
+        container_name: phpmyadmin_new
+        ports:
+            - "3400:80"
+        depends_on:
+            - db
+        networks:
+            - app-network
+networks:
+    app-network:
+        driver: bridge

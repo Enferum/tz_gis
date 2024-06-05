@@ -7,7 +7,7 @@ use App\Http\Requests\CalculationRequest;
 use App\Http\Requests\DriverRequest;
 use App\Http\Requests\TripsRequest;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Carbon;
 
 readonly class TripService
 {
@@ -25,8 +25,54 @@ readonly class TripService
         return $this->tripRepository->getAllDrivers($request);
     }
 
-    public function getAllTripTime(DriverRequest $request): Collection
+    public function getAllTripTimeByDriver(DriverRequest $request): array
     {
-        return $this->tripRepository->getTripTime($request);
+        $res = $this->tripRepository->getDriverTipsArray($request);
+
+        $mergedIntervals = $this->mergeIntervals($res);
+        $totalMinutes = 0;
+
+        foreach ($mergedIntervals as $interval) {
+            $pickup = Carbon::parse($interval['pickup']);
+            $dropoff = Carbon::parse($interval['dropoff']);
+
+            $totalMinutes += abs($dropoff->diffInSeconds($pickup));
+        }
+
+        $second = $totalMinutes % 60;
+        $minutes = floor($totalMinutes / 60);
+        $time = $minutes + $second / 100;
+
+        return [
+            'driver_id' => $request->driver_id,
+            'total_minutes_with_passenger' => $time
+        ];
+    }
+
+    protected function mergeIntervals($intervals)
+    {
+        $merged = [];
+        $current = null;
+
+        foreach ($intervals as $interval) {
+            if ($current === null) {
+                $current = $interval;
+                continue;
+            }
+
+            if (Carbon::parse($current['dropoff'])->greaterThanOrEqualTo(Carbon::parse($interval['pickup']))) {
+                $current['dropoff'] = max($current['dropoff'], $interval['dropoff']);
+            } else {
+                $merged[] = $current;
+                $current = $interval;
+            }
+
+        }
+
+        if ($current !== null) {
+            $merged[] = $current;
+        }
+
+        return $merged;
     }
 }

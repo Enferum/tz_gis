@@ -18,7 +18,7 @@
             <tr class="text-center">
                 <th scope="col"
                     class="px-6 py-3 sorting_asc" data-id="driver_id" data-table="calculation">Driver_id</th>
-                <th scope="col">Payable Time (minutes)</th>
+                <th scope="col">Payable Time (minutes.seconds)</th>
                 <th scope="col">Action</th>
             </tr>
             </thead>

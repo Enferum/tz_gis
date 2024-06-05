@@ -77,9 +77,9 @@ jQuery().ready(function () {
             data: { driver_id: driverId },
             dataType: 'json',
             success: function (response) {
-                const calculation = response.data
+                const calculation = response
                 const row = $calculationTable.find(`#${driverId}`);
-                row.html(calculation[0].total_minutes_with_passenger);
+                row.html(calculation.total_minutes_with_passenger);
             },
         });
     });

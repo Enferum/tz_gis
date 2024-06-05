@@ -35,15 +35,12 @@ class TripRepository
             ->paginate(Trip::LIMIT, page: $request['currentPage']);
     }
 
-    public function getTripTime(DriverRequest $request): Collection|array
+    public function getDriverTipsArray(DriverRequest $request): Collection|array
     {
         return Trip::query()
-            ->select(
-                'driver_id',
-                DB::raw('SUM(UNIX_TIMESTAMP(dropoff) - UNIX_TIMESTAMP(pickup)) / 60 AS total_minutes_with_passenger')
-            )
             ->where('driver_id', $request['driver_id'])
-            ->groupBy('driver_id')
-            ->get();
+            ->orderBy('pickup')
+            ->get()
+            ->toArray();
     }
 }

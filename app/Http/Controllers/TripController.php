@@ -9,6 +9,7 @@ use App\Http\Resources\CalculationResource;
 use App\Http\Resources\TripResource;
 use App\Services\TripService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class TripController extends Controller
@@ -37,8 +38,8 @@ class TripController extends Controller
         return CalculationResource::collection($this->tripService->getAllDrivers($request));
     }
 
-    public function getCalculationTips(DriverRequest $request): AnonymousResourceCollection
+    public function getCalculationTips(DriverRequest $request): JsonResponse
     {
-        return CalculationResource::collection($this->tripService->getAllTripTime($request));
+        return response()->json($this->tripService->getAllTripTimeByDriver($request));
     }
 }
